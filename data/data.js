@@ -9,17 +9,53 @@ const PARTIES = [
 const THEMES = [
   { id: 'all',        label: 'Alle Themen', subs: [] },
   { id: 'wohnen',     label: 'Wohnen',      subs: [
-    { id: 'all',      label: 'Alle' },
-    { id: 'miete',    label: 'Miete' },
-    { id: 'wohnbau',  label: 'Wohnbau' },
-    { id: 'eigentum', label: 'Eigentum & Kredit' },
-    { id: 'leerstand',label: 'Leerstand' },
+    { id: 'all',       label: 'Alle' },
+    { id: 'miete',     label: 'Miete' },
+    { id: 'wohnbau',   label: 'Wohnbau' },
+    { id: 'eigentum',  label: 'Eigentum & Kredit' },
+    { id: 'leerstand', label: 'Leerstand' },
   ]},
   { id: 'gesundheit', label: 'Gesundheit',  subs: [
-    { id: 'all',       label: 'Alle' },
-    { id: 'kassenarzt',label: 'Kassenärzte' },
-    { id: 'psyche',    label: 'Psychotherapie' },
-    { id: 'gesreform', label: 'Systemreform' },
+    { id: 'all',        label: 'Alle' },
+    { id: 'kassenarzt', label: 'Kassenärzte' },
+    { id: 'psyche',     label: 'Psychotherapie' },
+    { id: 'gesreform',  label: 'Systemreform' },
+  ]},
+  { id: 'budget',     label: 'Budget',      subs: [
+    { id: 'all',            label: 'Alle' },
+    { id: 'konsolidierung', label: 'Konsolidierung' },
+    { id: 'sozialabbau',    label: 'Sozialabbau' },
+    { id: 'klima_budget',   label: 'Klimaausgaben' },
+  ]},
+  { id: 'klima',      label: 'Klima & Energie', subs: [
+    { id: 'all',        label: 'Alle' },
+    { id: 'klimabonus', label: 'Klimabonus / CO2' },
+    { id: 'energie',    label: 'Energie' },
+  ]},
+  { id: 'soziales',   label: 'Soziales',    subs: [
+    { id: 'all',    label: 'Alle' },
+    { id: 'arbeit', label: 'Arbeit' },
+    { id: 'armut',  label: 'Armutsbekämpfung' },
+  ]},
+  { id: 'migration',  label: 'Migration',   subs: [
+    { id: 'all',         label: 'Alle' },
+    { id: 'asyl',        label: 'Asyl' },
+    { id: 'integration', label: 'Integration' },
+  ]},
+  { id: 'bildung',    label: 'Bildung',     subs: [
+    { id: 'all',        label: 'Alle' },
+    { id: 'schule',     label: 'Schule' },
+    { id: 'hochschule', label: 'Hochschule' },
+  ]},
+  { id: 'justiz',     label: 'Justiz',      subs: [
+    { id: 'all',         label: 'Alle' },
+    { id: 'sicherheit',  label: 'Sicherheit' },
+    { id: 'grundrechte', label: 'Grundrechte' },
+  ]},
+  { id: 'demokratie', label: 'Demokratie',  subs: [
+    { id: 'all',         label: 'Alle' },
+    { id: 'transparenz', label: 'Transparenz' },
+    { id: 'kontrolle',   label: 'Kontrolle' },
   ]},
 ];
 
