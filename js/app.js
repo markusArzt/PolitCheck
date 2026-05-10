@@ -4,21 +4,43 @@ const TOPIC_LABELS = {
   miete: 'Miete', wohnbau: 'Wohnbau', eigentum: 'Eigentum',
   leerstand: 'Leerstand', kassenarzt: 'Kassenärzte',
   psyche: 'Psychotherapie', gesreform: 'Systemreform',
+  konsolidierung: 'Konsolidierung', sozialabbau: 'Sozialabbau',
+  klima_budget: 'Klimaausgaben', klimabonus: 'Klimabonus/CO₂',
+  energie: 'Energie', arbeit: 'Arbeit', armut: 'Armutsbekämpfung',
+  asyl: 'Asyl', integration: 'Integration', schule: 'Schule',
+  hochschule: 'Hochschule', sicherheit: 'Sicherheit',
+  grundrechte: 'Grundrechte', transparenz: 'Transparenz', kontrolle: 'Kontrolle',
 };
 
-let selTheme    = 'all';
-let selSub      = 'all';
-let selParty    = 'fpoe';
-let openCards   = new Set();
+let selTheme     = 'all';
+let selSub       = 'all';
+let selParty     = 'fpoe';
+let openCards    = new Set();
 let openClusters = new Set();
+let currentPage  = 'promises';
 
-/* ── Navigation ── */
+/* ─────────────────────────────────────
+   NAVIGATION
+───────────────────────────────────── */
 function nav(page) {
+  currentPage = page;
   closeMenu();
+
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
+
+  // mobile menu items
   document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
-  document.getElementById('mi-' + page).classList.add('active');
+  const mi = document.getElementById('mi-' + page);
+  if (mi) mi.classList.add('active');
+
+  // desktop nav buttons
+  document.querySelectorAll('.desktop-nav-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.page === page);
+  });
+
+  // on votes page, wrap clusters in desktop grid
+  if (page === 'votes') applyDesktopClusterGrid();
 }
 
 function toggleMenu() {
@@ -28,7 +50,41 @@ function closeMenu() {
   document.getElementById('menu-overlay').classList.remove('open');
 }
 
-/* ── Scoring ── */
+/* ─────────────────────────────────────
+   DESKTOP INLINE NAV
+───────────────────────────────────── */
+function buildDesktopNav() {
+  const nav = document.getElementById('desktop-nav');
+  nav.innerHTML = [
+    { page: 'promises', label: 'Versprechen' },
+    { page: 'votes',    label: 'Alle Abstimmungen' },
+  ].map(item => `
+    <button class="desktop-nav-btn${item.page === currentPage ? ' active' : ''}"
+      data-page="${item.page}" onclick="nav('${item.page}')">
+      ${item.label}
+    </button>`
+  ).join('');
+}
+
+/* ─────────────────────────────────────
+   SIDEBAR VISIBILITY
+   On mobile the sidebar is part of the
+   page flow; on desktop it's sticky.
+   On the "votes" page, hide it on mobile.
+───────────────────────────────────── */
+function updateSidebarVisibility() {
+  const sidebar = document.getElementById('sidebar');
+  const isDesktop = window.innerWidth >= 1024;
+  if (!isDesktop && currentPage === 'votes') {
+    sidebar.style.display = 'none';
+  } else {
+    sidebar.style.display = '';
+  }
+}
+
+/* ─────────────────────────────────────
+   SCORING
+───────────────────────────────────── */
 function filteredRows(pid) {
   return PROMISE_DATA.filter(r => {
     if (pid && r.party !== pid) return false;
@@ -39,7 +95,7 @@ function filteredRows(pid) {
 }
 
 function scoreFor(pid) {
-  const rows = filteredRows(pid);
+  const rows  = filteredRows(pid);
   if (!rows.length) return { pct: 0, voll: 0, teil: 0, keine: 0 };
   const voll  = rows.filter(r => r.alignment === 'voll').length;
   const teil  = rows.filter(r => r.alignment === 'teil').length;
@@ -47,21 +103,25 @@ function scoreFor(pid) {
   return { pct: Math.round(((voll + teil * 0.5) / rows.length) * 100), voll, teil, keine };
 }
 
-/* ── Ring SVG ── */
-function ring(pct, active) {
-  const r    = 15;
+/* ─────────────────────────────────────
+   RING SVG
+───────────────────────────────────── */
+function ring(pct, active, size = 42) {
+  const r    = (size / 2) - 4;
   const circ = +(2 * Math.PI * r).toFixed(1);
   const off  = +(circ - (pct / 100) * circ).toFixed(1);
   const col  = active ? '#fff' : (pct >= 70 ? '#2D6A4F' : pct >= 40 ? '#8B5E00' : '#8B0000');
-  return `<svg viewBox="0 0 42 42">
-    <circle class="ring-bg" cx="21" cy="21" r="${r}"/>
-    <circle cx="21" cy="21" r="${r}" fill="none" stroke="${col}"
+  return `<svg viewBox="0 0 ${size} ${size}">
+    <circle class="ring-bg" cx="${size/2}" cy="${size/2}" r="${r}"/>
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${col}"
       stroke-width="3.5" stroke-linecap="round"
       stroke-dasharray="${circ}" stroke-dashoffset="${off}"/>
   </svg>`;
 }
 
-/* ── Build: theme pills ── */
+/* ─────────────────────────────────────
+   BUILD: THEME PILLS
+───────────────────────────────────── */
 function buildThemePills() {
   document.getElementById('theme-pills').innerHTML = THEMES.map(t =>
     `<button class="pill ${t.id === selTheme ? 'active' : 'inactive'}"
@@ -69,7 +129,9 @@ function buildThemePills() {
   ).join('');
 }
 
-/* ── Build: sub pills ── */
+/* ─────────────────────────────────────
+   BUILD: SUB PILLS
+───────────────────────────────────── */
 function buildSubPills() {
   const t   = THEMES.find(t => t.id === selTheme);
   const sec = document.getElementById('sub-section');
@@ -81,43 +143,72 @@ function buildSubPills() {
   ).join('');
 }
 
-/* ── Build: party cards ── */
+/* ─────────────────────────────────────
+   BUILD: PARTY CARDS
+───────────────────────────────────── */
 function buildParties() {
+  const isDesktop = window.innerWidth >= 1024;
+  const cardSize  = isDesktop ? 48 : 42;
+
   document.getElementById('parties').innerHTML = PARTIES.map(p => {
     const s      = scoreFor(p.id);
     const active = p.id === selParty;
     return `<div class="party-card${active ? ' active' : ''}" onclick="setParty('${p.id}')">
       <div class="party-abbr">${p.abbr}</div>
       <div class="party-result">${p.result}</div>
-      <div class="score-ring">${ring(s.pct, active)}<div class="score-num">${s.pct}%</div></div>
+      <div class="score-ring" style="width:${cardSize}px;height:${cardSize}px">
+        ${ring(s.pct, active, cardSize)}
+        <div class="score-num">${s.pct}%</div>
+      </div>
       <div class="party-name">${p.name}</div>
     </div>`;
   }).join('');
 }
 
-/* ── Build: summary bar ── */
+/* ─────────────────────────────────────
+   BUILD: SUMMARY BAR
+───────────────────────────────────── */
 function buildSummary() {
-  const s = scoreFor(selParty);
+  const s    = scoreFor(selParty);
+  const party = PARTIES.find(p => p.id === selParty);
   document.getElementById('summary').innerHTML = `
-    <div class="sum-card"><div class="sum-num" style="color:var(--voll)">${s.voll}</div><div class="sum-label">Übereinstimmung</div></div>
-    <div class="sum-card"><div class="sum-num" style="color:var(--teil)">${s.teil}</div><div class="sum-label">Teilweise</div></div>
-    <div class="sum-card"><div class="sum-num" style="color:var(--keine)">${s.keine}</div><div class="sum-label">Keine</div></div>
-    <div class="sum-card"><div class="sum-num">${s.pct}%</div><div class="sum-label">Score</div></div>`;
+    <div class="sum-card">
+      <div class="sum-num" style="color:var(--voll)">${s.voll}</div>
+      <div class="sum-label">Übereinstimmung</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-num" style="color:var(--teil)">${s.teil}</div>
+      <div class="sum-label">Teilweise</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-num" style="color:var(--keine)">${s.keine}</div>
+      <div class="sum-label">Keine</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-num">${s.pct}%</div>
+      <div class="sum-label">Score</div>
+    </div>`;
 }
 
-/* ── Build: promise list ── */
+/* ─────────────────────────────────────
+   BUILD: PROMISE LIST
+───────────────────────────────────── */
 function buildList() {
   const rows = filteredRows(selParty);
   document.getElementById('list-count').textContent = rows.length + ' Einträge';
+
   if (!rows.length) {
     document.getElementById('promise-list').innerHTML =
       '<div class="empty">Keine Einträge für diese Auswahl.</div>';
     return;
   }
+
   document.getElementById('promise-list').innerHTML = rows.map((r, i) => {
     const id     = `pc-${r.party}-${r.topic}-${i}`;
     const isOpen = openCards.has(id);
-    const posCls = r.position === 'ja' ? 'pos-ja' : r.position === 'nein' ? 'pos-nein' : 'pos-none';
+    const posCls = r.position === 'ja' ? 'pos-ja'
+                 : r.position === 'nein' ? 'pos-nein' : 'pos-none';
+
     return `<div class="promise-card${isOpen ? ' open' : ''}" id="${id}" onclick="toggleCard('${id}')">
       <div class="pc-top">
         <div class="dot ${r.alignment}"></div>
@@ -134,7 +225,7 @@ function buildList() {
         <div class="expand-row">
           <div class="expand-label">Wahlversprechen</div>
           <div class="expand-quote">${r.quote}</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:4px">${r.src}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:5px">${r.src}</div>
         </div>
         <div class="expand-row">
           <div class="expand-label">Abstimmung</div>
@@ -145,11 +236,11 @@ function buildList() {
         </div>
         <div class="expand-row">
           <div class="expand-label">Klassifizierung</div>
-          <div class="expand-val" style="font-size:11px;color:var(--muted)">${r.logic}</div>
+          <div class="expand-val" style="color:var(--muted)">${r.logic}</div>
         </div>
-        <div class="expand-row" style="margin-bottom:0">
+        <div class="expand-row">
           <div class="expand-label">Anmerkung</div>
-          <div class="expand-val" style="font-size:12px">${r.curator}</div>
+          <div class="expand-val">${r.curator}</div>
           ${r.url ? `<a class="parl-link" href="${r.url}" target="_blank" rel="noopener">Parlamentsprotokoll &#8599;</a>` : ''}
         </div>
       </div></div>
@@ -157,9 +248,11 @@ function buildList() {
   }).join('');
 }
 
-/* ── Build: cluster list ── */
+/* ─────────────────────────────────────
+   BUILD: CLUSTER LIST
+───────────────────────────────────── */
 function buildClusters() {
-  document.getElementById('cluster-list').innerHTML = CLUSTERS.map(c => {
+  const clusterHTML = CLUSTERS.map(c => {
     const isOpen = openClusters.has(c.id);
     return `<div class="cluster${isOpen ? ' open' : ''}" id="cl-${c.id}">
       <div class="cluster-head" onclick="toggleCluster('${c.id}')">
@@ -184,9 +277,24 @@ function buildClusters() {
       </div>
     </div>`;
   }).join('');
+
+  document.getElementById('cluster-list').innerHTML = clusterHTML;
+  applyDesktopClusterGrid();
 }
 
-/* ── State setters ── */
+function applyDesktopClusterGrid() {
+  const list = document.getElementById('cluster-list');
+  if (!list) return;
+  if (window.innerWidth >= 1024) {
+    list.classList.add('cluster-grid-desktop');
+  } else {
+    list.classList.remove('cluster-grid-desktop');
+  }
+}
+
+/* ─────────────────────────────────────
+   STATE SETTERS
+───────────────────────────────────── */
 function setTheme(id) {
   selTheme = id; selSub = 'all'; openCards.clear();
   buildThemePills(); buildSubPills(); buildParties(); buildSummary(); buildList();
@@ -208,13 +316,30 @@ function toggleCluster(id) {
   document.getElementById('cl-' + id)?.classList.toggle('open', openClusters.has(id));
 }
 
-/* ── Init ── */
+/* ─────────────────────────────────────
+   RESPONSIVE: rebuild on resize
+───────────────────────────────────── */
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    buildParties();
+    applyDesktopClusterGrid();
+    updateSidebarVisibility();
+  }, 150);
+});
+
+/* ─────────────────────────────────────
+   INIT
+───────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('mi-promises').classList.add('active');
+  buildDesktopNav();
   buildThemePills();
   buildSubPills();
   buildParties();
   buildSummary();
   buildList();
   buildClusters();
+  updateSidebarVisibility();
 });
