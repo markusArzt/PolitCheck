@@ -15,6 +15,11 @@
     <h1>PolitCheck <span style="font-size:14px;font-weight:400;color:var(--muted)">Österreich</span></h1>
     <div class="header-subtitle">Wahlversprechen 2024 · Nationalrat XXVIII. GP</div>
   </div>
+
+  <!-- Desktop: inline nav buttons -->
+  <div class="desktop-nav" id="desktop-nav"></div>
+
+  <!-- Mobile: donut menu -->
   <button class="menu-btn" onclick="toggleMenu()" aria-label="Menü öffnen">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
       <circle cx="8" cy="8" r="6.5"/>
@@ -25,7 +30,7 @@
   </button>
 </header>
 
-<!-- ── Menu overlay ── -->
+<!-- ── Mobile menu overlay ── -->
 <div class="menu-overlay" id="menu-overlay">
   <div class="menu-backdrop" onclick="closeMenu()"></div>
   <div class="menu-panel">
@@ -41,38 +46,43 @@
 </div>
 
 <main>
+  <!-- ── App layout: single col on mobile, sidebar+content on desktop ── -->
+  <div class="app-layout">
 
-  <!-- ── Page: Versprechen ── -->
-  <section class="page active" id="page-promises">
+    <!-- ── SIDEBAR (desktop) / inline (mobile) ── -->
+    <aside class="sidebar" id="sidebar">
+      <div class="nav-section">
+        <div class="nav-label">Thema</div>
+        <div class="pill-row" id="theme-pills"></div>
+      </div>
+      <div class="nav-section" id="sub-section">
+        <div class="nav-label">Bereich</div>
+        <div class="pill-row" id="sub-pills"></div>
+      </div>
+      <div class="party-scroll" id="parties"></div>
+      <div class="summary" id="summary"></div>
+    </aside>
 
-    <div class="nav-section">
-      <div class="nav-label">Thema</div>
-      <div class="pill-row" id="theme-pills"></div>
+    <!-- ── CONTENT AREA ── -->
+    <div class="content-area">
+
+      <!-- Page: Versprechen -->
+      <section class="page active" id="page-promises">
+        <div class="list-header">
+          <span class="list-title">Versprechen</span>
+          <span class="list-count" id="list-count"></span>
+        </div>
+        <div class="promise-list" id="promise-list"></div>
+      </section>
+
+      <!-- Page: Alle Abstimmungen -->
+      <section class="page" id="page-votes">
+        <div class="votes-meta">XXVIII. GP · ab 24.10.2024 · ~65 Beschlüsse geclustert</div>
+        <div id="cluster-list"></div>
+      </section>
+
     </div>
-
-    <div class="nav-section" id="sub-section">
-      <div class="nav-label">Bereich</div>
-      <div class="pill-row" id="sub-pills"></div>
-    </div>
-
-    <div class="party-scroll" id="parties"></div>
-
-    <div class="summary" id="summary"></div>
-
-    <div class="list-header">
-      <span class="list-title">Versprechen</span>
-      <span class="list-count" id="list-count"></span>
-    </div>
-    <div class="promise-list" id="promise-list"></div>
-
-  </section>
-
-  <!-- ── Page: Alle Abstimmungen ── -->
-  <section class="page" id="page-votes">
-    <div class="votes-meta">XXVIII. GP · ab 24.10.2024 · ~65 Beschlüsse geclustert</div>
-    <div id="cluster-list"></div>
-  </section>
-
+  </div>
 </main>
 
 <script src="data/data.js"></script>
